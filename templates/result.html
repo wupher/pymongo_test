@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="cn_zh">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>result</title>
+	<meta name="generator" content="TextMate http://macromates.com/">
+	<meta name="author" content="Fan Wu">
+	<!-- Date: 2011-06-07 -->
+</head>
+<body>
+	<div class="result">
+		<table boarder="1" cellspacing="5" cellpadding="5">
+			<tr>
+				<th>device_no</th>
+				<th>type</th>
+				<th>GPS时间</th>
+				<th>有效性</th>
+				<th>经度</th>
+				<th>纬度</th>
+				<th>海拔</th>
+				<th>速度</th>
+				<th>方向</th>
+				<th>里程</th>
+				<th>参数</th>
+				<th>接收时间</th>
+			<tr>
+			{% for item in docs %}
+			<tr>
+				<td>{{ item.device_no }}</td>
+				<td>{{ item.type }}</td>
+				<td>{{ item.gps_time }}</td>
+				<th>{{ item.valid }}</th>
+				<th>{{ item.loc.long}}</th>
+				<th>{{ item.loc.lat}}</th>
+				<th>{{ item.altitude}}</th>
+				<th>{{ item.speed }}</th>
+				<th>{{ item.navigation_course}}</th>
+				<th>{{ item.KM}}</th>
+				<th>{{ item.parameter}}</th>
+				<th>{{ item.receive_time}}</th>
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+</body>
+</html>
