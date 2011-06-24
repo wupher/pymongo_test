@@ -1,8 +1,9 @@
-#encoding=UTF-8
+#!/usr/bin/python
 import pymongo
 import os
-
+import re
 from pymongo import Connection
+from datetime import datetime
 
 def read_file(log_file):
 	"""read log file and format it to hash"""
@@ -15,13 +16,21 @@ def read_file(log_file):
 		else:
 			scon = content.split("\003")
 			if len(scon) == 13:
-				track = {'device_no' : scon[0], 'sim' : scon[1],'type' : scon[2],'gps_time' : scon[3],
-						 'valid' : scon[4], 'long' : scon[5], 'lat' : scon[6], 'altitude' : scon[7],
-						 'speed' : scon[8], 'course' : scon[9], 'km' : scon[10], 'para' : scon[11],
-						 'rtime' : scon[12].strip()}
+				track = {
+						 'device_no' : int(scon[0])[3:], 'sim' : scon[1], 'type':int(scon[2]), 'gps_time' : time_trans(scon[3]),
+						 'valid' : scon[4], 'loc':{'long' : float(scon[5]), 'lat' : float(scon[6]) }, 'altitude' : float(scon[7]),
+						 'speed' : float(scon[8]), 'course' : float(scon[9]), 'km' : float(scon[10]), 'para' : scon[11],
+						 'rtime' : time_trans(scon[12].strip())
+						}
 				result.append(track)
 	file.close()
 	return result
+	
+def time_trans(time_str):
+	"""trans the datetime string to datetime obj"""
+	p = re.compile("(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)")
+	if p.match(time_str):
+		return datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S")
 
 def list_file(path):
 	"""docstring for list_file"""
@@ -35,20 +44,20 @@ def list_file(path):
 		result.append(filename)
 	return result
 
-def conn_to_mongodb(coll_name):
+def conn_to_mongodb(database, collection):
 	conn = Connection()
-	db = conn.test
-	coll = db[coll_name]
+	db = conn[database]
+	coll = db[collection]
 	return coll
 
-def insert_into(data_set):
+def insert_into(database, collection, data_set):
 	""" save the data set into db """
-	coll = conn_to_mongodb('track_log')
+	coll = conn_to_mongodb(database, collection)
 	coll.insert(data_set)
 
 def get_coll_count():
 	""""""
-	coll = conn_to_mongodb('track_log')
+	coll = conn_to_mongodb('time_test','python')
 	return coll.count()
 	
 def query_data(query_str):
@@ -58,12 +67,10 @@ def query_data(query_str):
 	return docs
 
 if __name__ == '__main__':
-	# files =  list_file('/Users/fanwu/Desktop/trck')
+	print("Before Insert, there are %d rows in table" % get_coll_count())
+	# files =  list_file('/Users/fanwu/workspace/data/timetest')
 	# for log_file in files:
-	# 	data = read_file(log_file)
-	# 	insert_into(data)
-	# print("there is %d rows in table" % get_coll_count())
-	docs = query_data({"device_no":"00318960390455"})
-	for post in docs:
-		print post["type"]
-		
+	data = read_file('/Users/fanwu/workspace/data/timetest/Trck003_20110429091832.log')
+
+	insert_into("time_test","python",data)
+	print("Finally, there is %d rows in table" % get_coll_count())
